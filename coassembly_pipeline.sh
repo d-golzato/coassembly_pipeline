@@ -255,7 +255,7 @@ if [ ${step} -eq 4 ]; then
 fi
 
 if [ ${step} -eq 5 ]; then
-    var1="${assembly_dir}" var2="${coassembly_name}" var3="${bin_type}" var4="${c2b_len}" var5="${max_p}" var6="${min_s}" var7="${max_e}" var8="${advanced}" var9=${cores_6} var10=${assembler} ${scripts_dir}/metabat2_binning.sh
+    var1="${assembly_dir}" var2="${coassembly_name}" var3="${bin_type}" var4="${c2b_len}" var5="${max_p}" var6="${min_s}" var7="${max_e}" var8="${advanced}" var9=${cores_6} var10=${assembler} ${scripts_dir}/metabat2.sh
 fi
 
 if [ ${step} -eq 6 ]; then
