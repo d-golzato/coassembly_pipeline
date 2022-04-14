@@ -11,7 +11,7 @@ reads_folder="reads"
 
 help_message="\n\nThis script creates a folder with the symbolic links to fastq files of samples that you want to coassembly.\n\nYou can specify:\n    - A list with the fullpaths to the folder containing a sample reads (-L TEXT_FILE)\n    - Specify the name of the dataset that we have in scratch/data/meta and the list of sample names in it (-N CM_TEST -S Sample1 Sample2 Sample3 ...)\n    - Specify the folder containing the sub-directories of the samples with the reads in them  (-C PATH/TO/CUSTOM/DIR ) \n\n"
 
-while getopts "h?d:s:c:n:l:f:r" opt; do
+while getopts "h?d:s:c:n:l:f:ro:" opt; do
     case "$opt" in
     h)
         printf "$help_message"
@@ -62,7 +62,7 @@ if [ "$#" -lt 1 ]; then
     exit 1
 fi
 
-#TODO: Exit if you specify mutually exclusive options (-d, -c, -l)
+#Exit if you specify mutually exclusive options (-d, -c, -l)
 if [ ! ${exclusive_options_c} -eq 1 ]; then
     echo "-c, -d and -l are mutually exclusive options, please specify only one of these"
     exit 1

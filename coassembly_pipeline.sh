@@ -63,7 +63,7 @@ megahit_preset=""
 #STEP 7: Summarize CheckM qualities in binning or co-binning folder
 #STEP 7: Sort bins of binning or co-binning according to their qualities
 
-while getopts "h?d:s:l:b:g:m:nte:a:M:c:j:f:ir:A:E:N:S:D:C:L:" opt; do
+while getopts "h?d:s:l:b:g:m:nte:a:M:c:j:f:ir:A:E:N:S:D:C:L:O:" opt; do
     case "$opt" in
     h)
         printf "$header_message$help_message$steps_message"
@@ -133,8 +133,11 @@ while getopts "h?d:s:l:b:g:m:nte:a:M:c:j:f:ir:A:E:N:S:D:C:L:" opt; do
         done
         samples=$(IFS=" " ; echo "${samples[*]}")
         ;;
-    D) 
+    D)
         dataset="$OPTARG"
+        ;;
+    O)
+        assembly_dir="$OPTARG"
         ;;
     C)
         custom_directory="$OPTARG"
@@ -201,12 +204,12 @@ if [ ${step} -eq 1 ]; then
 
     if [ ! -z ${list_samples_file} ]; then
         list_samples_file=${list_samples_file}
-        ${scripts_dir}/create_symlinks.sh -l ${list_samples_file} ${coassembly_name}
+		${scripts_dir}/create_symlinks.sh -l ${list_samples_file} ${coassembly_name} -o ${assembly_dir}
         exit 0
     fi
 
     if [ ! -z ${custom_directory} ]; then
-        ${scripts_dir}/create_symlinks.sh -c ${custom_directory}/ ${coassembly_name}
+		${scripts_dir}/create_symlinks.sh -c ${custom_directory}/ ${coassembly_name} -o ${assembly_dir}
         exit 0
     fi
 
@@ -215,7 +218,8 @@ if [ ${step} -eq 1 ]; then
         if [ -z ${dataset_folder} ]; then
             dataset_folder=${default_dataset_folder}
         fi
-        ${scripts_dir}/create_symlinks.sh -f ${dataset_folder} -d ${dataset} -s ${samples} $coassembly_name
+		
+		${scripts_dir}/create_symlinks.sh -f ${dataset_folder} -d ${dataset} -s ${samples} $coassembly_name -o ${assembly_dir}
         exit 0
     fi
 
@@ -224,12 +228,12 @@ fi
 
 if [ ${step} -eq 2 ]; then
     if [ ${assembler} == "megahit" ]; then
-        var1="${assembly_dir}/${coassembly_name}" var2=${cores_1} var3=${mem_4} var4=${extension} ./megahit.sh
+        var1="${assembly_dir}/${coassembly_name}" var2=${cores_1} var3=${mem_4} var4=${extension} ${scripts_dir}/megahit.sh
         exit 0
     fi
 
     if [ ${assembler} == "spades" ]; then
-        var1="${assembly_dir}/${coassembly_name}" var2=${cores_1} var3=${mem_4} var4=${extension} var5=${spades_preset} ./spades.sh           
+        var1="${assembly_dir}/${coassembly_name}" var2=${cores_1} var3=${mem_4} var4=${extension} var5=${spades_preset} ${scripts_dir}/spades.sh        
         exit 0
     fi
 
@@ -238,12 +242,12 @@ if [ ${step} -eq 2 ]; then
 fi
 
 if [ ${step} -eq 3 ]; then
-    var1=${assembly_dir} var2=${coassembly_name} var3=${scripts_dir}/ var4=${filter_len} var5=${assembler} scripts_dir=${scripts_dir} ${scripts_dir}/filter_contigs.sh  filter_contigs.sh
+    var1=${assembly_dir} var2=${coassembly_name} var3=${scripts_dir}/ var4=${filter_len} var5=${assembler} scripts_dir=${scripts_dir} ${scripts_dir}/filter_contigs.sh 
 fi
 
 if [ ${step} -eq 4 ]; then
     if [ ${bin_type} == 'binning' ]; then
-        var1=${assembly_dir}  var2=${coassembly_name} var3=${cores_1} var4=${mem_4} var5=${extension} var6=${assembler}  ./bowtie2_binning.sh
+        var1=${assembly_dir}  var2=${coassembly_name} var3=${cores_1} var4=${mem_4} var5=${extension} var6=${assembler}  ${scripts_dir}/bowtie2_binning.sh
     else
         samples_to_map=($(ls -d ${assembly_dir}/${coassembly_name}/tmp_reads/*fastq* | xargs -I {} basename {} | sed 's/_R.\..*//g' | sort | uniq))
         parallel -j ${n_parallel_jobs}   "var1=${assembly_dir} var2=${coassembly_name} var3={} var4=${cores_1} var5=${mem_4} var6=${extension} var7=${assembler} ${scripts_dir}/bowtie2_cobinning.sh " ::: `echo "${samples_to_map[@]}"`
@@ -251,7 +255,7 @@ if [ ${step} -eq 4 ]; then
 fi
 
 if [ ${step} -eq 5 ]; then
-    var1="${assembly_dir}" var2="${coassembly_name}" var3="${bin_type}" var4="${filter_len}" var5="${max_p}" var6="${min_s}" var7="${max_e}" var8="${advanced}" var9=${cores_6} var10=${assembler} ./metabat2_binning.sh
+    var1="${assembly_dir}" var2="${coassembly_name}" var3="${bin_type}" var4="${c2b_len}" var5="${max_p}" var6="${min_s}" var7="${max_e}" var8="${advanced}" var9=${cores_6} var10=${assembler} ${scripts_dir}/metabat2_binning.sh
 fi
 
 if [ ${step} -eq 6 ]; then
